@@ -57,7 +57,7 @@ const INITIAL_BREEDING = [
     description: 'Carrying green eggs under tail, active in cave setup.',
     berriedDate: new Date(Date.now() - 86400000 * 12).toISOString().split('T')[0],
     imageUri: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=600&q=80',
-    status: 'active', // 'active' | 'hatched' | 'failed'
+    status: 'active',
     failReason: '',
   },
   {
@@ -135,7 +135,6 @@ export default function App() {
     const now = new Date();
     const diffDays = Math.floor((now - berriedDate) / (1000 * 60 * 60 * 24));
     
-    // Clarkii: ~3 weeks (21 days) | Australian Red Claw: ~6 to 8 weeks (42 to 56 days, avg 49)
     const isClarkii = species.toLowerCase().includes('clarkii');
     const targetDays = isClarkii ? 21 : 49;
     const daysRemaining = targetDays - diffDays;
@@ -281,7 +280,7 @@ export default function App() {
           <div className="space-y-6">
             <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-850 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
               <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-              <div className="max-w-2xl">
+              <div className="max-w-2xl relative z-10">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-4">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Live Farm Portal
                 </span>
