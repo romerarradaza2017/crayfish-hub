@@ -33,6 +33,7 @@ const BERRIED_STORAGE_KEY = 'roms_crayfish_berried_v1';
 const INITIAL_SALES = [
   { id: '1', buyerName: 'Juan Dela Cruz', date: new Date().toISOString().split('T')[0], totalPrice: '1200.00' },
   { id: '2', buyerName: 'Maria Santos', date: new Date(Date.now() - 86400000 * 2).toISOString().split('T')[0], totalPrice: '2500.00' },
+  { id: '3', buyerName: 'Alex Rivera', date: new Date(Date.now() - 86400000 * 5).toISOString().split('T')[0], totalPrice: '1800.00' },
 ];
 
 const INITIAL_INVENTORY = [
@@ -68,26 +69,36 @@ const INITIAL_BERRIED = [
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState('navHub');
+
+  // Sales State
   const [sales, setSales] = useState([]);
   const [buyerName, setBuyerName] = useState('');
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]);
   const [totalPrice, setTotalPrice] = useState('');
   const [analyticsTimeframe, setAnalyticsTimeframe] = useState('monthly');
+
+  // Inventory State
   const [inventory, setInventory] = useState([]);
   const [crayfishName, setCrayfishName] = useState('');
   const [crayfishSpecies, setCrayfishSpecies] = useState('');
   const [crayfishDefinition, setCrayfishDefinition] = useState('');
   const [crayfishStock, setCrayfishStock] = useState('10');
   const [crayfishImage, setCrayfishImage] = useState('');
+
+  // Berried Female State
   const [berriedList, setBerriedList] = useState([]);
   const [berriedSpecies, setBerriedSpecies] = useState('Clarkii');
   const [berriedDesc, setBerriedDesc] = useState('');
   const [berriedDate, setBerriedDate] = useState(new Date().toISOString().split('T')[0]);
   const [berriedImage, setBerriedImage] = useState('');
   const [editingBerriedId, setEditingBerriedId] = useState(null);
+
+  // Resolution Modal State
   const [resolvingItem, setResolvingItem] = useState(null);
   const [resolutionType, setResolutionType] = useState('hatched');
   const [failReasonInput, setFailReasonInput] = useState('');
+
+  // Toast
   const [toastMessage, setToastMessage] = useState(null);
   const fileInputRef = useRef(null);
 
@@ -285,7 +296,11 @@ export default function App() {
       if (analyticsTimeframe === 'monthly') return itemDate >= new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) && itemDate <= now;
       return true;
     });
-    return { filteredSales: filtered, totalRevenue: filtered.reduce((sum, item) => sum + (parseFloat(item.totalPrice) || 0), 0), totalTransactions: filtered.length };
+    const totalRevenue = filtered.reduce((sum, item) => sum + (parseFloat(item.totalPrice) || 0), 0);
+    const totalTransactions = filtered.length;
+    const avgTransaction = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
+    const maxSale = filtered.reduce((max, item) => Math.max(max, parseFloat(item.totalPrice) || 0), 0);
+    return { filteredSales: filtered, totalRevenue, totalTransactions, avgTransaction, maxSale };
   }, [sales, analyticsTimeframe]);
 
   const berriedStats = useMemo(() => {
@@ -296,6 +311,8 @@ export default function App() {
     const successRate = finished > 0 ? Math.round((hatched / finished) * 100) : (hatched > 0 ? 100 : 0);
     return { active, hatched, failed, successRate };
   }, [berriedList]);
+
+  const allTimeRevenue = useMemo(() => sales.reduce((sum, i) => sum + (parseFloat(i.totalPrice) || 0), 0), [sales]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
@@ -334,6 +351,7 @@ export default function App() {
         </div>
       )}
 
+      {/* Header */}
       <header className="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3 sm:px-8">
         <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -354,7 +372,10 @@ export default function App() {
         </div>
       </header>
 
+      {/* Main Container */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+        
+        {/* 1. NAVIGATION HUB */}
         {currentScreen === 'navHub' && (
           <div className="space-y-6">
             <div className="bg-gradient-to-br from-slate-900 to-slate-850 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
@@ -375,41 +396,26 @@ export default function App() {
               </div>
             </div>
 
+            {/* Migration Panel */}
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
               <div>
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <Download className="w-4 h-4 text-teal-400" /> Device Data Migration (Backup / Restore)
                 </h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  Export your sales & berried logs from your old app, then import into the new layout!
-                </p>
+                <p className="text-xs text-slate-400 mt-1">Export your sales & berried logs from your old app, then import into the new layout!</p>
               </div>
-
               <div className="flex flex-wrap items-center gap-3 pt-1">
-                <button 
-                  onClick={handleExportBackup} 
-                  className="flex items-center justify-center gap-2 bg-teal-500 hover:bg-teal-600 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-md"
-                >
+                <button onClick={handleExportBackup} className="flex items-center justify-center gap-2 bg-teal-500 hover:bg-teal-600 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-md">
                   <Download className="w-4 h-4" /> Export Backup (.json)
                 </button>
-
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  accept=".json" 
-                  onChange={handleImportBackup} 
-                  className="hidden" 
-                />
-                
-                <button 
-                  onClick={() => fileInputRef.current?.click()} 
-                  className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs transition"
-                >
+                <input type="file" ref={fileInputRef} accept=".json" onChange={handleImportBackup} className="hidden" />
+                <button onClick={() => fileInputRef.current?.click()} className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs transition">
                   <Upload className="w-4 h-4 text-teal-400" /> Import Backup File
                 </button>
               </div>
             </div>
 
+            {/* Stat Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div onClick={() => setCurrentScreen('berriedList')} className="bg-slate-900 border border-slate-800 p-4 rounded-2xl cursor-pointer hover:border-rose-500/50 transition">
                 <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Active Berried</p>
@@ -428,9 +434,48 @@ export default function App() {
                 <div className="flex items-center justify-between mt-2"><span className="text-2xl font-black text-white">{inventory.length}</span><Package className="w-5 h-5 text-purple-400" /></div>
               </div>
             </div>
+
+            {/* Modules Grid */}
+            <div>
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Farm Management Modules</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div onClick={() => setCurrentScreen('berriedList')} className="group bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-rose-500/50 p-6 rounded-2xl transition cursor-pointer flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center border border-rose-500/20 group-hover:scale-110 transition shrink-0"><Heart className="w-6 h-6 fill-rose-400" /></div>
+                  <div>
+                    <h4 className="text-lg font-bold text-white group-hover:text-rose-400 transition">Berried Female & Hatching Tracker</h4>
+                    <p className="text-slate-400 text-sm mt-1">Monitor gestation days, incubation alerts (Clarkii 3 wks, Red Claw 6-8 wks), and hatch success rates.</p>
+                  </div>
+                </div>
+
+                <div onClick={() => setCurrentScreen('salesDashboard')} className="group bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-amber-500/50 p-6 rounded-2xl transition cursor-pointer flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20 group-hover:scale-110 transition shrink-0"><BarChart3 className="w-6 h-6" /></div>
+                  <div>
+                    <h4 className="text-lg font-bold text-white group-hover:text-amber-400 transition">Sales Dashboard & Analytics</h4>
+                    <p className="text-slate-400 text-sm mt-1">Filter revenue performance by Daily, Weekly (7 days), Monthly (30 days), and All-Time.</p>
+                  </div>
+                </div>
+
+                <div onClick={() => setCurrentScreen('salesRecords')} className="group bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-blue-500/50 p-6 rounded-2xl transition cursor-pointer flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition shrink-0"><ShoppingBag className="w-6 h-6" /></div>
+                  <div>
+                    <h4 className="text-lg font-bold text-white group-hover:text-blue-400 transition">Sales Records Ledger</h4>
+                    <p className="text-slate-400 text-sm mt-1">View full customer transactions history, dates, buyer names, and total PHP revenue.</p>
+                  </div>
+                </div>
+
+                <div onClick={() => setCurrentScreen('crayfishList')} className="group bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-purple-500/50 p-6 rounded-2xl transition cursor-pointer flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20 group-hover:scale-110 transition shrink-0"><Package className="w-6 h-6" /></div>
+                  <div>
+                    <h4 className="text-lg font-bold text-white group-hover:text-purple-400 transition">Available Crayfish Catalog</h4>
+                    <p className="text-slate-400 text-sm mt-1">Manage stock counts, species care descriptions, and custom variety photo uploads.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
+        {/* 2. BERRIED LIST SCREEN */}
         {currentScreen === 'berriedList' && (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -492,25 +537,39 @@ export default function App() {
           </div>
         )}
 
+        {/* 3. ADD / EDIT BERRIED FORM */}
         {currentScreen === 'addBerriedForm' && (
           <div className="max-w-xl mx-auto space-y-6">
             <button onClick={() => setCurrentScreen('berriedList')} className="flex items-center gap-2 text-slate-400 hover:text-white transition text-sm font-semibold"><ChevronLeft className="w-4 h-4" /> Back</button>
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl">
               <h2 className="text-xl font-bold text-white mb-4">{editingBerriedId ? 'Edit Berried Record' : 'Log Berried Female'}</h2>
               <form onSubmit={handleSaveBerried} className="space-y-4">
-                <select value={berriedSpecies} onChange={(e) => setBerriedSpecies(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none">
-                  <option value="Clarkii">Clarkii (~3 Weeks)</option>
-                  <option value="Australian Red Claw">Australian Red Claw (6-8 Weeks)</option>
-                </select>
-                <input type="date" required value={berriedDate} onChange={(e) => setBerriedDate(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none" />
-                <textarea rows={3} required placeholder="Notes & description..." value={berriedDesc} onChange={(e) => setBerriedDesc(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm resize-none focus:outline-none" />
-                <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onloadend = () => setBerriedImage(r.result); r.readAsDataURL(f); } }} className="w-full text-xs text-slate-400" />
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Species</label>
+                  <select value={berriedSpecies} onChange={(e) => setBerriedSpecies(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none">
+                    <option value="Clarkii">Clarkii (~3 Weeks)</option>
+                    <option value="Australian Red Claw">Australian Red Claw (6-8 Weeks)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Berried Date</label>
+                  <input type="date" required value={berriedDate} onChange={(e) => setBerriedDate(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Description</label>
+                  <textarea rows={3} required placeholder="Notes & description..." value={berriedDesc} onChange={(e) => setBerriedDesc(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm resize-none focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Photo Upload</label>
+                  <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onloadend = () => setBerriedImage(r.result); r.readAsDataURL(f); } }} className="w-full text-xs text-slate-400" />
+                </div>
                 <button type="submit" className="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-xl text-sm transition">Save Record</button>
               </form>
             </div>
           </div>
         )}
 
+        {/* 4. SUCCESS RATE DASHBOARD */}
         {currentScreen === 'berriedDashboard' && (
           <div className="space-y-6">
             <button onClick={() => setCurrentScreen('berriedList')} className="flex items-center gap-2 text-slate-400 hover:text-white transition text-xs font-semibold"><ChevronLeft className="w-3.5 h-3.5" /> Back to Berried List</button>
@@ -523,6 +582,7 @@ export default function App() {
           </div>
         )}
 
+        {/* 5. SALES FORM */}
         {currentScreen === 'salesForm' && (
           <div className="max-w-xl mx-auto space-y-6">
             <button onClick={() => setCurrentScreen('navHub')} className="flex items-center gap-2 text-slate-400 hover:text-white transition text-sm font-semibold"><ChevronLeft className="w-4 h-4" /> Back</button>
@@ -538,12 +598,21 @@ export default function App() {
           </div>
         )}
 
+        {/* 6. SALES RECORDS LEDGER */}
         {currentScreen === 'salesRecords' && (
           <div className="space-y-6">
-            <div className="flex justify-between items-center"><button onClick={() => setCurrentScreen('navHub')} className="text-xs text-slate-400">← Back</button><button onClick={() => setCurrentScreen('salesForm')} className="bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs">+ Add Sale</button></div>
+            <div className="flex justify-between items-center">
+              <button onClick={() => setCurrentScreen('navHub')} className="text-xs text-slate-400">← Back</button>
+              <div className="flex gap-2">
+                <button onClick={() => setCurrentScreen('salesForm')} className="bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs">+ Add Sale</button>
+                <button onClick={() => setCurrentScreen('salesDashboard')} className="bg-amber-500 text-slate-950 font-black px-4 py-2 rounded-xl text-xs">Analytics</button>
+              </div>
+            </div>
             <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
               <table className="w-full text-left text-sm text-slate-300">
-                <thead className="bg-slate-950 text-xs font-bold uppercase text-slate-400 border-b border-slate-800"><tr><th className="py-3 px-6">Buyer</th><th className="py-3 px-6">Date</th><th className="py-3 px-6 text-right">Price</th><th className="py-3 px-6 text-center">Action</th></tr></thead>
+                <thead className="bg-slate-950 text-xs font-bold uppercase text-slate-400 border-b border-slate-800">
+                  <tr><th className="py-3 px-6">Buyer</th><th className="py-3 px-6">Date</th><th className="py-3 px-6 text-right">Price</th><th className="py-3 px-6 text-center">Action</th></tr>
+                </thead>
                 <tbody className="divide-y divide-slate-800">
                   {sales.map(item => (
                     <tr key={item.id}>
@@ -559,43 +628,86 @@ export default function App() {
           </div>
         )}
 
+        {/* 7. SALES ANALYTICS DASHBOARD */}
         {currentScreen === 'salesDashboard' && (
           <div className="space-y-6">
             <button onClick={() => setCurrentScreen('navHub')} className="text-xs text-slate-400">← Back</button>
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
-              <p className="text-xs font-bold text-slate-400 uppercase">Revenue</p>
-              <p className="text-3xl font-black text-emerald-400 mt-2">₱{analytics.totalRevenue.toFixed(2)}</p>
+            <div className="bg-slate-900 border border-slate-800 p-1.5 rounded-2xl flex items-center gap-1">
+              {[
+                { id: 'daily', label: 'Daily (Today)' },
+                { id: 'weekly', label: '7 Days' },
+                { id: 'monthly', label: '30 Days' },
+                { id: 'all', label: 'All Time' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setAnalyticsTimeframe(tab.id)}
+                  className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold transition text-center ${analyticsTimeframe === tab.id ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'}`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                <p className="text-xs font-bold text-slate-400 uppercase">Revenue</p>
+                <p className="text-3xl font-black text-emerald-400 mt-2">₱{analytics.totalRevenue.toFixed(2)}</p>
+              </div>
+              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                <p className="text-xs font-bold text-slate-400 uppercase">Transactions</p>
+                <p className="text-3xl font-black text-white mt-2">{analytics.totalTransactions}</p>
+              </div>
+              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                <p className="text-xs font-bold text-slate-400 uppercase">Average Sale</p>
+                <p className="text-3xl font-black text-purple-300 mt-2">₱{analytics.avgTransaction.toFixed(2)}</p>
+              </div>
             </div>
           </div>
         )}
 
+        {/* 8. CRAYFISH CATALOG INVENTORY */}
         {currentScreen === 'crayfishList' && (
           <div className="space-y-6">
-            <div className="flex justify-between items-center"><button onClick={() => setCurrentScreen('navHub')} className="text-xs text-slate-400">← Back</button><button onClick={() => setCurrentScreen('addCrayfishForm')} className="bg-purple-500 text-white font-bold px-4 py-2 rounded-xl text-xs">+ Add Variety</button></div>
+            <div className="flex justify-between items-center">
+              <button onClick={() => setCurrentScreen('navHub')} className="text-xs text-slate-400">← Back</button>
+              <button onClick={() => setCurrentScreen('addCrayfishForm')} className="bg-purple-500 text-white font-bold px-4 py-2 rounded-xl text-xs">+ Add Variety</button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {inventory.map(item => (
                 <div key={item.id} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-                  <div className="h-48 bg-slate-950 relative"><img src={item.imageUri} alt={item.name} className="w-full h-full object-cover" /></div>
-                  <div className="p-5"><h3 className="text-lg font-bold text-white">{item.name}</h3><p className="text-slate-300 text-xs mt-1">{item.definition}</p></div>
+                  <div className="h-48 bg-slate-950 relative">
+                    <img src={item.imageUri} alt={item.name} className="w-full h-full object-cover" />
+                    <button onClick={() => handleDeleteCrayfish(item.id)} className="absolute top-3 right-3 bg-slate-900/80 hover:bg-red-500 text-slate-300 hover:text-white p-2 rounded-lg transition"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                  <div className="p-5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400 italic">{item.species}</span>
+                    <h3 className="text-lg font-bold text-white mt-0.5">{item.name}</h3>
+                    <p className="text-slate-300 text-xs mt-1">{item.definition}</p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
 
+        {/* 9. ADD CRAYFISH FORM */}
         {currentScreen === 'addCrayfishForm' && (
           <div className="max-w-xl mx-auto space-y-6">
             <button onClick={() => setCurrentScreen('crayfishList')} className="text-xs text-slate-400">← Back</button>
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-              <h2 className="text-xl font-bold text-white mb-4">Add Crayfish</h2>
+              <h2 className="text-xl font-bold text-white mb-4">Add Crayfish Variety</h2>
               <form onSubmit={handleSaveCrayfish} className="space-y-4">
-                <input type="text" required placeholder="Name" value={crayfishName} onChange={(e) => setCrayfishName(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none" />
-                <textarea rows={3} required placeholder="Description" value={crayfishDefinition} onChange={(e) => setCrayfishDefinition(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white resize-none focus:outline-none" />
-                <button type="submit" className="w-full bg-purple-500 font-bold py-3 rounded-xl text-sm text-white">Save</button>
+                <input type="text" required placeholder="Variety Name" value={crayfishName} onChange={(e) => setCrayfishName(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none" />
+                <input type="text" placeholder="Species (e.g. Procambarus alleni)" value={crayfishSpecies} onChange={(e) => setCrayfishSpecies(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none" />
+                <input type="number" min="0" value={crayfishStock} onChange={(e) => setCrayfishStock(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none" />
+                <textarea rows={3} required placeholder="Description & care notes..." value={crayfishDefinition} onChange={(e) => setCrayfishDefinition(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white resize-none focus:outline-none" />
+                <button type="submit" className="w-full bg-purple-500 font-bold py-3 rounded-xl text-sm text-white">Save Crayfish Entry</button>
               </form>
             </div>
           </div>
         )}
+
       </main>
 
       <footer className="border-t border-slate-800 bg-slate-900 py-6 text-center text-xs text-slate-500">
