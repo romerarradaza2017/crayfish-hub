@@ -62,16 +62,16 @@ const INITIAL_BREEDING = [
     id: 'b1',
     species: 'Clarkii',
     description: 'Tank 3 breeding female, robust berry load with bright dark eggs.',
-    berriedDate: new Date(Date.now() - 86400000 * 14).toISOString().split('T')[0], // 14 days ago (~2 weeks)
+    berriedDate: new Date(Date.now() - 86400000 * 14).toISOString().split('T')[0],
     imageUri: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=600&q=80',
-    status: 'active', // 'active' | 'hacked' | 'failed'
+    status: 'active',
     failReason: '',
   },
   {
     id: 'b2',
     species: 'Australian Red Claw',
     description: 'Large broodstock female in warm filtered setup.',
-    berriedDate: new Date(Date.now() - 86400000 * 45).toISOString().split('T')[0], // 45 days ago (~6.4 weeks)
+    berriedDate: new Date(Date.now() - 86400000 * 45).toISOString().split('T')[0],
     imageUri: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
     status: 'active',
     failReason: '',
@@ -103,9 +103,8 @@ export default function App() {
   const [breedDate, setBreedDate] = useState(new Date().toISOString().split('T')[0]);
   const [breedImage, setBreedImage] = useState('');
   
-  // Modal / Action state for resolving status (Hatch or Fail)
   const [resolutionModalItem, setResolutionModalItem] = useState(null);
-  const [resolutionType, setResolutionType] = useState('hacked'); // 'hacked' | 'failed'
+  const [resolutionType, setResolutionType] = useState('hacked');
   const [failReasonInput, setFailReasonInput] = useState('');
 
   const [toastMessage, setToastMessage] = useState(null);
@@ -401,27 +400,23 @@ export default function App() {
     };
   }, [breedingEntries]);
 
-  // Helper function to calculate berried days & hatch readiness
   const getBreedingStatusDetails = (item) => {
     const berriedDateObj = new Date(item.berriedDate);
     const now = new Date();
     const diffTime = now - berriedDateObj;
     const daysBerried = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
 
-    // Incubation rules:
-    // Clarkii: ~3 weeks (21 days). Expected range: 18 - 23 days. About to hatch: daysBerried >= 18 && daysBerried <= 23
-    // Australian Red Claw: ~6-8 weeks (42 - 56 days). About to hatch: daysBerried >= 40 && daysBerried <= 56
-    let minDays = 21;
-    let maxDays = 23;
+    let minDays = 18;
+    let maxDays = 21;
     let expectedLabel = '3 Weeks (21 Days)';
 
     if (item.species === 'Australian Red Claw') {
-      minDays = 42;
+      minDays = 40;
       maxDays = 56;
       expectedLabel = '6-8 Weeks (42-56 Days)';
     }
 
-    const isAboutToHatch = daysBerried >= (minDays - 3) && daysBerried <= maxDays;
+    const isAboutToHatch = daysBerried >= minDays && daysBerried <= maxDays;
     const isOverdue = daysBerried > maxDays;
 
     return {
@@ -440,7 +435,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Resolution Modal for Hatching / Failure */}
       {resolutionModalItem && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-700 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-5">
@@ -527,7 +521,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Main Top Bar Header */}
+      {/* Header */}
       <header className="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3 sm:px-8">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -571,9 +565,8 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Body Layout */}
+      {/* Main View Controller */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        {/* 1. NAVIGATION HUB SCREEN */}
         {currentScreen === 'navHub' && (
           <div className="space-y-6">
             <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-900/80 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
@@ -607,7 +600,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Quick Stat Summary Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <div 
                 onClick={() => setCurrentScreen('breedingDashboard')}
@@ -657,7 +649,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Main Navigation Modules */}
             <div>
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
                 Farm Management Modules
@@ -763,7 +754,6 @@ export default function App() {
           </div>
         )}
 
-        {/* 2. BREEDING & HATCHING DASHBOARD */}
         {currentScreen === 'breedingDashboard' && (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -797,7 +787,6 @@ export default function App() {
               </button>
             </div>
 
-            {/* Breeding Analytics Metrics Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-gradient-to-br from-slate-900 to-slate-900/90 border border-amber-500/30 p-5 rounded-2xl relative overflow-hidden">
                 <div className="flex items-center justify-between">
@@ -846,7 +835,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Breeding List / Grid */}
             {breedingEntries.length === 0 ? (
               <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center">
                 <AlertCircle className="w-12 h-12 text-slate-500 mx-auto mb-3" />
@@ -929,7 +917,6 @@ export default function App() {
                             {item.description}
                           </p>
 
-                          {/* Days Berried & Hatch Alert Tag */}
                           <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-2">
                             <div className="flex items-center justify-between text-xs">
                               <span className="text-slate-400 flex items-center gap-1">
@@ -958,7 +945,6 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* Action footer to mark as hatch or failed */}
                       {item.status === 'active' && (
                         <div className="p-4 bg-slate-950/60 border-t border-slate-800 flex items-center gap-2">
                           <button
@@ -991,7 +977,6 @@ export default function App() {
           </div>
         )}
 
-        {/* 3. ADD / EDIT BREEDING ENTRY FORM */}
         {currentScreen === 'addBreedingForm' && (
           <div className="max-w-xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
@@ -1026,8 +1011,8 @@ export default function App() {
                     onChange={(e) => setBreedSpecies(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-4 py-3 text-white focus:outline-none transition text-sm font-medium"
                   >
-                    <option value="Clarkii">Clarkii (Expected Incubation: ~3 Weeks / 21 Days)</option>
-                    <option value="Australian Red Claw">Australian Red Claw (Expected Incubation: ~6-8 Weeks)</option>
+                    <option value="Clarkii">Clarkii (Expected Incubation: ~3 Weeks / 18-21 Days)</option>
+                    <option value="Australian Red Claw">Australian Red Claw (Expected Incubation: ~6-8 Weeks / 40-56 Days)</option>
                   </select>
                 </div>
 
@@ -1105,7 +1090,6 @@ export default function App() {
           </div>
         )}
 
-        {/* 4. ENTER SALE FORM SCREEN */}
         {currentScreen === 'salesForm' && (
           <div className="max-w-xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
@@ -1203,7 +1187,6 @@ export default function App() {
           </div>
         )}
 
-        {/* 5. SALES RECORDS LIST SCREEN */}
         {currentScreen === 'salesRecords' && (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1295,7 +1278,6 @@ export default function App() {
           </div>
         )}
 
-        {/* 6. SALES ANALYTICS DASHBOARD */}
         {currentScreen === 'salesDashboard' && (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1441,7 +1423,6 @@ export default function App() {
           </div>
         )}
 
-        {/* 7. CRAYFISH CATALOG INVENTORY LIST SCREEN */}
         {currentScreen === 'crayfishList' && (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1529,7 +1510,6 @@ export default function App() {
           </div>
         )}
 
-        {/* 8. ADD CRAYFISH ITEM FORM SCREEN */}
         {currentScreen === 'addCrayfishForm' && (
           <div className="max-w-xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
