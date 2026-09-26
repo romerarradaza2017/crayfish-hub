@@ -23,17 +23,18 @@ import {
   XCircle,
   Edit3,
   Download,
-  Upload
+  Upload,
+  Eye,
+  Maximize2
 } from 'lucide-react';
 
 const SALES_STORAGE_KEY = 'roms_crayfish_sales_v3';
-const INVENTORY_STORAGE_KEY = 'roms_crayfish_inventory_v3';
+const INVENTORY_STORAGE_KEY = 'roms_crayfish_inventory_v4';
 const BERRIED_STORAGE_KEY = 'roms_crayfish_berried_v1';
 
 const INITIAL_SALES = [
   { id: '1', buyerName: 'Juan Dela Cruz', date: new Date().toISOString().split('T')[0], totalPrice: '1200.00' },
   { id: '2', buyerName: 'Maria Santos', date: new Date(Date.now() - 86400000 * 2).toISOString().split('T')[0], totalPrice: '2500.00' },
-  { id: '3', buyerName: 'Alex Rivera', date: new Date(Date.now() - 86400000 * 5).toISOString().split('T')[0], totalPrice: '1800.00' },
 ];
 
 const INITIAL_INVENTORY = [
@@ -44,14 +45,10 @@ const INITIAL_INVENTORY = [
     definition: 'Vibrant sky-blue freshwater crayfish. Reaches 4-5 inches. Prefers hidden rock crevices, moderate water flow, and clean water.',
     imageUri: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=600&q=80',
     stockCount: 15,
-  },
-  {
-    id: '102',
-    name: 'Red Claw Crayfish',
-    species: 'Cherax quadricarinatus',
-    definition: 'Tropical Australian species known for blue-green body and distinctive red patch on male claws. Grows rapidly up to 8-10 inches.',
-    imageUri: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
-    stockCount: 8,
+    subInventories: [
+      { id: 'sub1', category: 'Breeder', sizeRange: '4-5 inches', configSet: 'Pair', price: '1500.00' },
+      { id: 'sub2', category: 'Juvenile', sizeRange: '1.5-2 inches', configSet: 'Individual', price: '350.00' }
+    ]
   },
 ];
 
@@ -79,11 +76,19 @@ export default function App() {
 
   // Inventory State
   const [inventory, setInventory] = useState([]);
+  const [editingCrayfishId, setEditingCrayfishId] = useState(null);
   const [crayfishName, setCrayfishName] = useState('');
   const [crayfishSpecies, setCrayfishSpecies] = useState('');
   const [crayfishDefinition, setCrayfishDefinition] = useState('');
   const [crayfishStock, setCrayfishStock] = useState('10');
   const [crayfishImage, setCrayfishImage] = useState('');
+  const [selectedInventoryItem, setSelectedInventoryItem] = useState(null); // Full screen view
+
+  // Sub-inventory form state (empty fields by default)
+  const [subCategory, setSubCategory] = useState('Breeder');
+  const [subSizeRange, setSubSizeRange] = useState('');
+  const [subConfigSet, setSubConfigSet] = useState('Pair');
+  const [subPrice, setSubPrice] = useState('');
 
   // Berried Female State
   const [berriedList, setBerriedList] = useState([]);
@@ -172,6 +177,108 @@ export default function App() {
     reader.readAsText(file);
   };
 
+  // Crayfish Catalog & Sub-inventory Handlers
+  const handleSaveCrayfish = (e) => {
+    if (e) e.preventDefault();
+    if (!crayfishName.trim() || !crayfishDefinition.trim()) {
+      showToast('❌ Provide name and description');
+      return;
+    }
+
+    if (editingCrayfishId) {
+      const updated = inventory.map(item => item.id === editingCrayfishId ? {
+        ...item,
+        name: crayfishName.trim(),
+        species: crayfishSpecies.trim() || 'Freshwater Species',
+        definition: crayfishDefinition.trim(),
+        stockCount: parseInt(crayfishStock) || 0,
+        imageUri: crayfishImage || item.imageUri
+      } : item);
+      saveInventory(updated);
+      setEditingCrayfishId(null);
+      showToast('✅ Crayfish variety updated!');
+    } else {
+      const newItem = {
+        id: Date.now().toString(),
+        name: crayfishName.trim(),
+        species: crayfishSpecies.trim() || 'Freshwater Species',
+        definition: crayfishDefinition.trim(),
+        stockCount: parseInt(crayfishStock) || 0,
+        imageUri: crayfishImage || 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=600&q=80',
+        subInventories: []
+      };
+      saveInventory([newItem, ...inventory]);
+      showToast('✅ Crayfish added to catalog!');
+    }
+
+    setCrayfishName('');
+    setCrayfishSpecies('');
+    setCrayfishDefinition('');
+    setCrayfishStock('10');
+    setCrayfishImage('');
+    setCurrentScreen('crayfishList');
+  };
+
+  const handleEditCrayfish = (item) => {
+    setEditingCrayfishId(item.id);
+    setCrayfishName(item.name);
+    setCrayfishSpecies(item.species);
+    setCrayfishDefinition(item.definition);
+    setCrayfishStock(item.stockCount.toString());
+    setCrayfishImage(item.imageUri);
+    setCurrentScreen('addCrayfishForm');
+  };
+
+  const handleDeleteCrayfish = (id) => {
+    if (window.confirm('Delete this crayfish variety?')) {
+      saveInventory(inventory.filter(i => i.id !== id));
+      showToast('🗑️ Variety removed');
+      if (selectedInventoryItem?.id === id) setSelectedInventoryItem(null);
+    }
+  };
+
+  const handleAddSubInventory = (e) => {
+    e.preventDefault();
+    if (!selectedInventoryItem) return;
+    if (!subSizeRange.trim() || !subPrice) {
+      showToast('❌ Please fill in size range and price');
+      return;
+    }
+
+    const newSub = {
+      id: Date.now().toString(),
+      category: subCategory,
+      sizeRange: subSizeRange.trim(),
+      configSet: subConfigSet,
+      price: parseFloat(subPrice).toFixed(2)
+    };
+
+    const updatedItem = {
+      ...selectedInventoryItem,
+      subInventories: [...(selectedInventoryItem.subInventories || []), newSub]
+    };
+
+    const updatedInventory = inventory.map(i => i.id === updatedItem.id ? updatedItem : i);
+    saveInventory(updatedInventory);
+    setSelectedInventoryItem(updatedItem);
+
+    // Reset sub-inventory form fields to empty
+    setSubSizeRange('');
+    setSubPrice('');
+    showToast('✅ Sub-inventory category added!');
+  };
+
+  const handleDeleteSubInventory = (subId) => {
+    if (!selectedInventoryItem) return;
+    const updatedSubs = selectedInventoryItem.subInventories.filter(s => s.id !== subId);
+    const updatedItem = { ...selectedInventoryItem, subInventories: updatedSubs };
+    const updatedInventory = inventory.map(i => i.id === updatedItem.id ? updatedItem : i);
+    saveInventory(updatedInventory);
+    setSelectedInventoryItem(updatedItem);
+    showToast('🗑️ Sub-inventory removed');
+  };
+
+  // Berried handlers
   const getIncubationDetails = (item) => {
     const start = new Date(item.berriedDate);
     const now = new Date();
@@ -185,7 +292,7 @@ export default function App() {
   const handleSaveBerried = (e) => {
     if (e) e.preventDefault();
     if (!berriedDesc.trim()) {
-      showToast('❌ Please provide a description for the berried female');
+      showToast('❌ Please provide a description');
       return;
     }
     if (editingBerriedId) {
@@ -258,32 +365,6 @@ export default function App() {
     }
   };
 
-  const handleSaveCrayfish = (e) => {
-    if (e) e.preventDefault();
-    if (!crayfishName.trim() || !crayfishDefinition.trim()) {
-      showToast('❌ Provide name and description');
-      return;
-    }
-    saveInventory([{
-      id: Date.now().toString(), name: crayfishName.trim(), species: crayfishSpecies.trim() || 'Freshwater Species',
-      definition: crayfishDefinition.trim(), stockCount: parseInt(crayfishStock) || 0,
-      imageUri: crayfishImage || 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=600&q=80'
-    }, ...inventory]);
-    setCrayfishName('');
-    setCrayfishSpecies('');
-    setCrayfishDefinition('');
-    setCrayfishImage('');
-    showToast('✅ Crayfish added to catalog!');
-    setCurrentScreen('crayfishList');
-  };
-
-  const handleDeleteCrayfish = (id) => {
-    if (window.confirm('Delete this crayfish variety?')) {
-      saveInventory(inventory.filter(i => i.id !== id));
-      showToast('🗑️ Variety removed');
-    }
-  };
-
   const analytics = useMemo(() => {
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
@@ -312,8 +393,6 @@ export default function App() {
     return { active, hatched, failed, successRate };
   }, [berriedList]);
 
-  const allTimeRevenue = useMemo(() => sales.reduce((sum, i) => sum + (parseFloat(i.totalPrice) || 0), 0), [sales]);
-
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       {toastMessage && (
@@ -322,6 +401,113 @@ export default function App() {
         </div>
       )}
 
+      {/* Full Screen Modal for Inventory Item */}
+      {selectedInventoryItem && (
+        <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md overflow-y-auto p-4 sm:p-8">
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div>
+                <span className="text-xs font-bold text-purple-400 uppercase tracking-wider italic">{selectedInventoryItem.species}</span>
+                <h2 className="text-2xl sm:text-3xl font-black text-white">{selectedInventoryItem.name}</h2>
+              </div>
+              <button
+                onClick={() => setSelectedInventoryItem(null)}
+                className="bg-slate-900 hover:bg-slate-800 text-slate-300 p-3 rounded-xl transition border border-slate-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="h-64 sm:h-80 rounded-2xl overflow-hidden border border-slate-800 bg-slate-900">
+                  <img src={selectedInventoryItem.imageUri} alt={selectedInventoryItem.name} className="w-full h-full object-cover" />
+                </div>
+                <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
+                  <span className="text-xs font-bold text-emerald-400">In-Stock Count: {selectedInventoryItem.stockCount} units</span>
+                  <p className="text-slate-300 text-sm leading-relaxed">{selectedInventoryItem.definition}</p>
+                </div>
+              </div>
+
+              {/* Sub-Inventory Manager */}
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6 flex flex-col justify-between">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <Package className="w-5 h-5 text-purple-400" /> Sub-Inventory Categories & Pricing
+                  </h3>
+
+                  {/* Sub-inventory list */}
+                  {(!selectedInventoryItem.subInventories || selectedInventoryItem.subInventories.length === 0) ? (
+                    <p className="text-xs text-slate-500 italic py-4">No sub-inventory pricing sets added yet.</p>
+                  ) : (
+                    <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                      {selectedInventoryItem.subInventories.map((sub) => (
+                        <div key={sub.id} className="bg-slate-950 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-extrabold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 uppercase">{sub.category}</span>
+                              <span className="text-xs font-bold text-white">{sub.sizeRange}</span>
+                            </div>
+                            <p className="text-xs text-slate-400 mt-1">Set: {sub.configSet}</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm font-black text-emerald-400">₱{sub.price}</span>
+                            <button onClick={() => handleDeleteSubInventory(sub.id)} className="text-slate-500 hover:text-red-400 p-1">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Add Sub-Inventory Form (Empty fields by default) */}
+                <form onSubmit={handleAddSubInventory} className="border-t border-slate-800 pt-4 space-y-3">
+                  <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Add Sub-Inventory Set</h4>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Category</label>
+                      <select value={subCategory} onChange={(e) => setSubCategory(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs focus:outline-none">
+                        <option value="Breeder">Breeder</option>
+                        <option value="Grow out">Grow out</option>
+                        <option value="Juvenile">Juvenile</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Config Set</label>
+                      <select value={subConfigSet} onChange={(e) => setSubConfigSet(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs focus:outline-none">
+                        <option value="Individual">Individual</option>
+                        <option value="Pair">Pair</option>
+                        <option value="Trio">Trio</option>
+                        <option value="Quadro">Quadro</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Size Range (inches)</label>
+                      <input type="text" placeholder="e.g. 4-5 inches" value={subSizeRange} onChange={(e) => setSubSizeRange(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs focus:outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Price (₱ PHP)</label>
+                      <input type="number" step="0.01" min="0" placeholder="0.00" value={subPrice} onChange={(e) => setSubPrice(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs focus:outline-none font-bold text-emerald-400" />
+                    </div>
+                  </div>
+
+                  <button type="submit" className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md">
+                    + Add Sub-Inventory Set
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Resolution Modal */}
       {resolvingItem && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-700 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
@@ -384,7 +570,7 @@ export default function App() {
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Live Farm Portal
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-2">Welcome Back, Rom! 👋</h2>
-                <p className="text-slate-300 text-sm leading-relaxed mb-6">Track sales performance, inventory catalog, and monitor berried female crayfish incubation and hatching success rates in real-time.</p>
+                <p className="text-slate-300 text-sm leading-relaxed mb-6">Track sales performance, inventory catalog with sub-categories, and monitor berried female incubation in real-time.</p>
                 <div className="flex flex-wrap items-center gap-3">
                   <button onClick={() => setCurrentScreen('addBerriedForm')} className="inline-flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-bold px-4 py-2.5 rounded-xl transition text-sm shadow-lg">
                     <Heart className="w-4 h-4 fill-white" /> Log Berried Female
@@ -466,8 +652,8 @@ export default function App() {
                 <div onClick={() => setCurrentScreen('crayfishList')} className="group bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-purple-500/50 p-6 rounded-2xl transition cursor-pointer flex items-start gap-4">
                   <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20 group-hover:scale-110 transition shrink-0"><Package className="w-6 h-6" /></div>
                   <div>
-                    <h4 className="text-lg font-bold text-white group-hover:text-purple-400 transition">Available Crayfish Catalog</h4>
-                    <p className="text-slate-400 text-sm mt-1">Manage stock counts, species care descriptions, and custom variety photo uploads.</p>
+                    <h4 className="text-lg font-bold text-white group-hover:text-purple-400 transition">Available Crayfish Catalog & Sub-Inventory</h4>
+                    <p className="text-slate-400 text-sm mt-1">Manage variety stock, sub-categories (Breeder, Grow out, Juvenile), sizes, configs, and pricing sets.</p>
                   </div>
                 </div>
               </div>
@@ -537,7 +723,7 @@ export default function App() {
           </div>
         )}
 
-        {/* 3. ADD / EDIT BERRIED FORM */}
+        {/* 3. ADD / EDIT BERRIED FORM (Empty fields default for new) */}
         {currentScreen === 'addBerriedForm' && (
           <div className="max-w-xl mx-auto space-y-6">
             <button onClick={() => setCurrentScreen('berriedList')} className="flex items-center gap-2 text-slate-400 hover:text-white transition text-sm font-semibold"><ChevronLeft className="w-4 h-4" /> Back</button>
@@ -666,48 +852,103 @@ export default function App() {
           </div>
         )}
 
-        {/* 8. CRAYFISH CATALOG INVENTORY */}
+        {/* 8. CRAYFISH CATALOG INVENTORY (With Edit, Delete, & Full Screen Click) */}
         {currentScreen === 'crayfishList' && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <button onClick={() => setCurrentScreen('navHub')} className="text-xs text-slate-400">← Back</button>
-              <button onClick={() => setCurrentScreen('addCrayfishForm')} className="bg-purple-500 text-white font-bold px-4 py-2 rounded-xl text-xs">+ Add Variety</button>
+              <button onClick={() => { setEditingCrayfishId(null); setCrayfishName(''); setCrayfishSpecies(''); setCrayfishDefinition(''); setCrayfishStock('10'); setCrayfishImage(''); setCurrentScreen('addCrayfishForm'); }} className="bg-purple-500 text-white font-bold px-4 py-2 rounded-xl text-xs">+ Add New Variety</button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {inventory.map(item => (
-                <div key={item.id} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-                  <div className="h-48 bg-slate-950 relative">
-                    <img src={item.imageUri} alt={item.name} className="w-full h-full object-cover" />
-                    <button onClick={() => handleDeleteCrayfish(item.id)} className="absolute top-3 right-3 bg-slate-900/80 hover:bg-red-500 text-slate-300 hover:text-white p-2 rounded-lg transition"><Trash2 className="w-4 h-4" /></button>
+            
+            {inventory.length === 0 ? (
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center text-slate-400 text-xs">Catalog is currently empty.</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {inventory.map(item => (
+                  <div key={item.id} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between">
+                    <div>
+                      {/* Clicking the image/card opens fullscreen view */}
+                      <div onClick={() => setSelectedInventoryItem(item)} className="h-48 bg-slate-950 relative cursor-pointer group">
+                        <img src={item.imageUri} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                        <div className="absolute inset-0 bg-slate-950/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                          <span className="bg-slate-900/90 text-white text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 border border-slate-700">
+                            <Maximize2 className="w-3.5 h-3.5" /> Tap to View Full Screen & Sub-Inventory
+                          </span>
+                        </div>
+                        <span className="absolute bottom-3 left-3 bg-slate-950/80 text-emerald-400 text-xs font-bold px-2.5 py-1 rounded-md border border-slate-800">
+                          Stock: {item.stockCount} units
+                        </span>
+                      </div>
+
+                      <div className="p-5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400 italic">{item.species}</span>
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => handleEditCrayfish(item)} className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition" title="Edit variety">
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => handleDeleteCrayfish(item.id)} className="text-slate-400 hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition" title="Delete variety">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+
+                        <h3 onClick={() => setSelectedInventoryItem(item)} className="text-lg font-bold text-white mt-0.5 cursor-pointer hover:text-purple-400 transition">{item.name}</h3>
+                        <p className="text-slate-300 text-xs mt-1 line-clamp-2">{item.definition}</p>
+
+                        {/* Sub-inventory summary preview */}
+                        <div className="mt-3 pt-3 border-t border-slate-800 flex flex-wrap gap-1.5">
+                          {(!item.subInventories || item.subInventories.length === 0) ? (
+                            <span className="text-[10px] text-slate-500 italic">No sub-categories added. Tap to manage pricing sets.</span>
+                          ) : (
+                            item.subInventories.map(sub => (
+                              <span key={sub.id} className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                                {sub.category} ({sub.configSet}) - ₱{sub.price}
+                              </span>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="p-5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400 italic">{item.species}</span>
-                    <h3 className="text-lg font-bold text-white mt-0.5">{item.name}</h3>
-                    <p className="text-slate-300 text-xs mt-1">{item.definition}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
-        {/* 9. ADD CRAYFISH FORM */}
+        {/* 9. ADD / EDIT CRAYFISH FORM (Empty fields default for new) */}
         {currentScreen === 'addCrayfishForm' && (
           <div className="max-w-xl mx-auto space-y-6">
-            <button onClick={() => setCurrentScreen('crayfishList')} className="text-xs text-slate-400">← Back</button>
+            <button onClick={() => setCurrentScreen('crayfishList')} className="flex items-center gap-2 text-slate-400 hover:text-white transition text-sm font-semibold"><ChevronLeft className="w-4 h-4" /> Back to Catalog</button>
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-              <h2 className="text-xl font-bold text-white mb-4">Add Crayfish Variety</h2>
+              <h2 className="text-xl font-bold text-white mb-4">{editingCrayfishId ? 'Edit Crayfish Variety' : 'Add Crayfish Variety'}</h2>
               <form onSubmit={handleSaveCrayfish} className="space-y-4">
-                <input type="text" required placeholder="Variety Name" value={crayfishName} onChange={(e) => setCrayfishName(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none" />
-                <input type="text" placeholder="Species (e.g. Procambarus alleni)" value={crayfishSpecies} onChange={(e) => setCrayfishSpecies(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none" />
-                <input type="number" min="0" value={crayfishStock} onChange={(e) => setCrayfishStock(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none" />
-                <textarea rows={3} required placeholder="Description & care notes..." value={crayfishDefinition} onChange={(e) => setCrayfishDefinition(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white resize-none focus:outline-none" />
-                <button type="submit" className="w-full bg-purple-500 font-bold py-3 rounded-xl text-sm text-white">Save Crayfish Entry</button>
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Variety Name</label>
+                  <input type="text" required placeholder="e.g. Electric Blue Crayfish" value={crayfishName} onChange={(e) => setCrayfishName(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Species Name</label>
+                  <input type="text" placeholder="e.g. Procambarus alleni" value={crayfishSpecies} onChange={(e) => setCrayfishSpecies(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Stock Count</label>
+                  <input type="number" min="0" value={crayfishStock} onChange={(e) => setCrayfishStock(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Definition & Care Notes</label>
+                  <textarea rows={3} required placeholder="Description..." value={crayfishDefinition} onChange={(e) => setCrayfishDefinition(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white resize-none focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Photo Upload</label>
+                  <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onloadend = () => setCrayfishImage(r.result); r.readAsDataURL(f); } }} className="w-full text-xs text-slate-400" />
+                </div>
+                <button type="submit" className="w-full bg-purple-500 hover:bg-purple-600 font-bold py-3.5 rounded-xl text-sm text-white transition">Save Variety Entry</button>
               </form>
             </div>
           </div>
         )}
-
       </main>
 
       <footer className="border-t border-slate-800 bg-slate-900 py-6 text-center text-xs text-slate-500">
