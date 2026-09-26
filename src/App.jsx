@@ -4,16 +4,14 @@ import {
   ChevronLeft,
   ShoppingBag,
   Package,
-  TrendingUp,
   Trash2,
-  X,
-  Layers,
-  BarChart3,
-  CheckCircle2,
-  AlertCircle,
   Heart,
   CheckCircle,
-  Edit3
+  Edit3,
+  BarChart3,
+  AlertCircle,
+  CheckCircle2,
+  Layers
 } from 'lucide-react';
 
 const SALES_STORAGE_KEY = 'roms_crayfish_sales_v4';
@@ -78,11 +76,6 @@ export default function App() {
 
   // Inventory state
   const [inventory, setInventory] = useState([]);
-  const [crayfishName, setCrayfishName] = useState('');
-  const [crayfishSpecies, setCrayfishSpecies] = useState('');
-  const [crayfishDefinition, setCrayfishDefinition] = useState('');
-  const [crayfishStock, setCrayfishStock] = useState('10');
-  const [crayfishImage, setCrayfishImage] = useState('');
 
   // Breeding & Berried State
   const [breedingList, setBreedingList] = useState([]);
@@ -91,7 +84,6 @@ export default function App() {
   const [breedDate, setBreedDate] = useState(new Date().toISOString().split('T')[0]);
   const [breedImage, setBreedImage] = useState('');
   
-  // Edit / Modal State for Breeding Entry
   const [editingBreedId, setEditingBreedId] = useState(null);
   const [statusModalItem, setStatusModalItem] = useState(null);
   const [modalNewStatus, setModalNewStatus] = useState('hatched');
@@ -225,172 +217,169 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950">
+    <div style={{ minHeight: '100vh', backgroundColor: '#020617', color: '#f8fafc', display: 'flex', flexDirection: 'column', fontFamily: 'sans-serif' }}>
       {toastMessage && (
-        <div className="fixed top-5 right-5 z-50 bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce">
-          <span className="text-sm font-bold">{toastMessage}</span>
+        <div style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 50, backgroundColor: '#0f172a', border: '1px solid #334155', color: '#ffffff', padding: '12px 16px', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.5)', fontWeight: 'bold' }}>
+          {toastMessage}
         </div>
       )}
 
       {/* Top Navbar */}
-      <header className="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3 sm:px-8">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentScreen('navHub')}>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-xl shadow-lg shadow-emerald-500/20">
-              🦐
-            </div>
-            <div>
-              <span className="text-[10px] font-bold tracking-widest text-emerald-400 uppercase block">
-                Crayfish Farm Hub
-              </span>
-              <h1 className="text-lg sm:text-xl font-extrabold text-white tracking-tight">
-                Rom's Crayfish Hub
-              </h1>
-            </div>
+      <header style={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(8px)', borderBottom: '1px solid #1e293b', position: 'sticky', top: 0, zIndex: 40, padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => setCurrentScreen('navHub')}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'linear-gradient(to top right, #10b981, #2dd4bf)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
+            🦐
           </div>
+          <div>
+            <span style={{ fontSize: '10px', fontWeight: 'bold', letterSpacing: '0.05em', color: '#34d399', textTransform: 'uppercase', display: 'block' }}>
+              Crayfish Farm Hub
+            </span>
+            <h1 style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+              Rom's Crayfish Hub
+            </h1>
+          </div>
+        </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentScreen('breedingList')}
-              className="flex items-center gap-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 px-3.5 py-2 rounded-lg transition text-xs font-bold"
-            >
-              <Heart className="w-4 h-4 fill-rose-500/20" /> Berried & Hatching
-            </button>
-            <button
-              onClick={() => setCurrentScreen('navHub')}
-              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 px-3.5 py-2 rounded-lg border border-slate-700 transition text-xs font-bold"
-            >
-              <Layers className="w-4 h-4" />
-              <span className="hidden sm:inline">Nav Hub</span>
-            </button>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            onClick={() => setCurrentScreen('breedingList')}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(244, 63, 94, 0.1)', color: '#fb7185', border: '1px solid rgba(244, 63, 94, 0.3)', padding: '8px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+          >
+            <Heart size={14} /> Berried & Hatching
+          </button>
+          <button
+            onClick={() => setCurrentScreen('navHub')}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#1e293b', color: '#34d399', padding: '8px 14px', borderRadius: '8px', border: '1px solid #334155', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+          >
+            <Layers size={14} /> Nav Hub
+          </button>
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+      {/* Main Container */}
+      <main style={{ flex: 1, maxWidth: '1150px', width: '100%', margin: '0 auto', padding: '24px', boxSizing: 'border-box' }}>
+        
         {/* 1. NAVIGATION HUB */}
         {currentScreen === 'navHub' && (
-          <div className="space-y-6">
-            <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-850 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
-              <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-              <div className="max-w-2xl relative z-10">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-4">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Live Farm Portal
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div style={{ background: 'linear-gradient(to bottom right, #0f172a, #1e293b)', border: '1px solid #334155', borderRadius: '16px', padding: '32px', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ maxWidth: '650px' }}>
+                <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '9999px', fontSize: '12px', fontWeight: 600, backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.2)', marginBottom: '16px' }}>
+                  ● Live Farm Portal
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-2">
+                <h2 style={{ fontSize: '28px', fontWeight: 900, color: '#ffffff', margin: '0 0 8px 0' }}>
                   Welcome Back, Rom! 👋
                 </h2>
-                <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
+                <p style={{ color: '#cbd5e1', fontSize: '15px', lineHeight: 1.6, margin: '0 0 24px 0' }}>
                   Track sales performance, inventory catalog, and monitor berried female crayfish incubation and hatching success rates in real-time.
                 </p>
-                <div className="flex flex-wrap gap-3">
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                   <button
                     onClick={() => setCurrentScreen('addBreedingForm')}
-                    className="inline-flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-bold px-5 py-2.5 rounded-xl transition shadow-lg shadow-rose-500/25 text-sm"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#f43f5e', color: '#ffffff', fontWeight: 'bold', padding: '12px 20px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '14px', boxShadow: '0 10px 15px -3px rgba(244, 63, 94, 0.3)' }}
                   >
-                    <Heart className="w-4 h-4 fill-white" /> Log Berried Female
+                    <Heart size={16} /> Log Berried Female
                   </button>
                   <button
                     onClick={() => setCurrentScreen('salesForm')}
-                    className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-5 py-2.5 rounded-xl transition text-sm"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#10b981', color: '#020617', fontWeight: 'bold', padding: '12px 20px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '14px' }}
                   >
-                    <Plus className="w-4 h-4 stroke-[3]" /> Record New Sale
+                    <Plus size={16} /> Record New Sale
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Stat Summary Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div className="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl flex items-center justify-between">
+            {/* Stat Summary Cards Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+              <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', padding: '20px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                  <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Active Berried</p>
-                  <p className="text-2xl font-black text-rose-400 mt-1">{breedingAnalytics.active}</p>
+                  <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#94a3b8', textTransform: 'uppercase', margin: 0 }}>Active Berried</p>
+                  <p style={{ fontSize: '26px', fontWeight: 900, color: '#fb7185', margin: '4px 0 0 0' }}>{breedingAnalytics.active}</p>
                 </div>
-                <div className="w-12 h-12 bg-rose-500/10 text-rose-400 rounded-xl flex items-center justify-center border border-rose-500/20">
-                  <Heart className="w-6 h-6" />
+                <div style={{ width: '48px', height: '48px', backgroundColor: 'rgba(244, 63, 94, 0.1)', color: '#fb7185', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(244, 63, 94, 0.2)' }}>
+                  <Heart size={22} />
                 </div>
               </div>
 
-              <div className="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl flex items-center justify-between">
+              <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', padding: '20px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                  <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Hatching Success</p>
-                  <p className="text-2xl font-black text-emerald-400 mt-1">{breedingAnalytics.successRate}%</p>
+                  <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#94a3b8', textTransform: 'uppercase', margin: 0 }}>Hatching Success</p>
+                  <p style={{ fontSize: '26px', fontWeight: 900, color: '#34d399', margin: '4px 0 0 0' }}>{breedingAnalytics.successRate}%</p>
                 </div>
-                <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center border border-emerald-500/20">
-                  <CheckCircle className="w-6 h-6" />
+                <div style={{ width: '48px', height: '48px', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#34d399', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                  <CheckCircle size={22} />
                 </div>
               </div>
 
-              <div className="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl flex items-center justify-between">
+              <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', padding: '20px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                  <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Sales Records</p>
-                  <p className="text-2xl font-black text-white mt-1">{sales.length}</p>
+                  <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#94a3b8', textTransform: 'uppercase', margin: 0 }}>Sales Records</p>
+                  <p style={{ fontSize: '26px', fontWeight: 900, color: '#ffffff', margin: '4px 0 0 0' }}>{sales.length}</p>
                 </div>
-                <div className="w-12 h-12 bg-blue-500/10 text-blue-400 rounded-xl flex items-center justify-center border border-blue-500/20">
-                  <ShoppingBag className="w-6 h-6" />
+                <div style={{ width: '48px', height: '48px', backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#60a5fa', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                  <ShoppingBag size={22} />
                 </div>
               </div>
 
-              <div className="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl flex items-center justify-between">
+              <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', padding: '20px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                  <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Catalog Varieties</p>
-                  <p className="text-2xl font-black text-white mt-1">{inventory.length}</p>
+                  <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#94a3b8', textTransform: 'uppercase', margin: 0 }}>Catalog Varieties</p>
+                  <p style={{ fontSize: '26px', fontWeight: 900, color: '#ffffff', margin: '4px 0 0 0' }}>{inventory.length}</p>
                 </div>
-                <div className="w-12 h-12 bg-purple-500/10 text-purple-400 rounded-xl flex items-center justify-center border border-purple-500/20">
-                  <Package className="w-6 h-6" />
+                <div style={{ width: '48px', height: '48px', backgroundColor: 'rgba(168, 85, 247, 0.1)', color: '#c084fc', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
+                  <Package size={22} />
                 </div>
               </div>
             </div>
 
             {/* Navigation Cards Grid */}
             <div>
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
+              <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px' }}>
                 Farm Management Modules
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
                 <div
                   onClick={() => setCurrentScreen('breedingList')}
-                  className="group bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-rose-500/50 p-6 rounded-2xl transition cursor-pointer shadow-lg"
+                  style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', padding: '24px', borderRadius: '16px', cursor: 'pointer', transition: 'border-color 0.2s' }}
                 >
-                  <div className="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center border border-rose-500/20 mb-4 group-hover:scale-110 transition">
-                    <Heart className="w-6 h-6" />
+                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'rgba(244, 63, 94, 0.1)', color: '#fb7185', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(244, 63, 94, 0.2)', marginBottom: '16px' }}>
+                    <Heart size={24} />
                   </div>
-                  <h4 className="text-lg font-bold text-white group-hover:text-rose-400 transition">
+                  <h4 style={{ fontSize: '18px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 8px 0' }}>
                     Berried & Hatching Tracker
                   </h4>
-                  <p className="text-slate-400 text-sm mt-1 leading-relaxed">
+                  <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
                     Monitor berried females, incubation countdowns, hatching success rates, and log failure reasons.
                   </p>
                 </div>
 
                 <div
                   onClick={() => setCurrentScreen('salesDashboard')}
-                  className="group bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-amber-500/50 p-6 rounded-2xl transition cursor-pointer shadow-lg"
+                  style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', padding: '24px', borderRadius: '16px', cursor: 'pointer' }}
                 >
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20 mb-4 group-hover:scale-110 transition">
-                    <BarChart3 className="w-6 h-6" />
+                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#fbbf24', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(245, 158, 11, 0.2)', marginBottom: '16px' }}>
+                    <BarChart3 size={24} />
                   </div>
-                  <h4 className="text-lg font-bold text-white group-hover:text-amber-400 transition">
+                  <h4 style={{ fontSize: '18px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 8px 0' }}>
                     Sales Dashboard
                   </h4>
-                  <p className="text-slate-400 text-sm mt-1 leading-relaxed">
+                  <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
                     View daily, weekly, monthly, and all-time financial revenue analytics.
                   </p>
                 </div>
 
                 <div
                   onClick={() => setCurrentScreen('crayfishList')}
-                  className="group bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-purple-500/50 p-6 rounded-2xl transition cursor-pointer shadow-lg"
+                  style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', padding: '24px', borderRadius: '16px', cursor: 'pointer' }}
                 >
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20 mb-4 group-hover:scale-110 transition">
-                    <Package className="w-6 h-6" />
+                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'rgba(168, 85, 247, 0.1)', color: '#c084fc', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(168, 85, 247, 0.2)', marginBottom: '16px' }}>
+                    <Package size={24} />
                   </div>
-                  <h4 className="text-lg font-bold text-white group-hover:text-purple-400 transition">
+                  <h4 style={{ fontSize: '18px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 8px 0' }}>
                     Crayfish Inventory Catalog
                   </h4>
-                  <p className="text-slate-400 text-sm mt-1 leading-relaxed">
+                  <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
                     Manage stock varieties, species definitions, photo uploads, and counts.
                   </p>
                 </div>
@@ -401,20 +390,20 @@ export default function App() {
 
         {/* 2. BREEDING & HATCHING TRACKER SCREEN */}
         {currentScreen === 'breedingList' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
               <div>
                 <button
                   onClick={() => setCurrentScreen('navHub')}
-                  className="flex items-center gap-2 text-slate-400 hover:text-white transition text-xs font-semibold mb-1"
+                  style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 600, padding: 0, marginBottom: '4px' }}
                 >
-                  <ChevronLeft className="w-3.5 h-3.5" /> Navigation Hub
+                  <ChevronLeft size={14} /> Navigation Hub
                 </button>
-                <h2 className="text-2xl font-black text-white flex items-center gap-2">
-                  <Heart className="w-6 h-6 text-rose-400 fill-rose-500/20" /> Berried & Hatching Tracker
+                <h2 style={{ fontSize: '24px', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Heart size={24} color="#fb7185" /> Berried & Hatching Tracker
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Monitor incubation progress (Clarkii: 3 weeks | Australian Red Claw: 6-8 weeks)
+                <p style={{ fontSize: '12px', color: '#94a3b8', margin: '4px 0 0 0' }}>
+                  Incubation Timelines: Clarkii (3 weeks) | Australian Red Claw (6-8 weeks)
                 </p>
               </div>
 
@@ -427,118 +416,115 @@ export default function App() {
                   setBreedImage('');
                   setCurrentScreen('addBreedingForm');
                 }}
-                className="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-bold px-4 py-2.5 rounded-xl transition text-xs shadow-md shadow-rose-500/20"
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#f43f5e', color: '#ffffff', fontWeight: 'bold', padding: '10px 18px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '12px' }}
               >
-                <Plus className="w-4 h-4 stroke-[3]" /> Add Berried Female
+                <Plus size={16} /> Add Berried Female
               </button>
             </div>
 
-            {/* Breeding Success Metrics Header */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-                <span className="text-[10px] uppercase font-bold text-slate-400">Total Tracked</span>
-                <p className="text-2xl font-black text-white mt-1">{breedingAnalytics.total}</p>
+            {/* Metrics Header */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+              <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', padding: '16px', borderRadius: '16px' }}>
+                <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold', color: '#94a3b8' }}>Total Tracked</span>
+                <p style={{ fontSize: '24px', fontWeight: 900, color: '#ffffff', margin: '4px 0 0 0' }}>{breedingAnalytics.total}</p>
               </div>
-              <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-                <span className="text-[10px] uppercase font-bold text-rose-400">Active Berried</span>
-                <p className="text-2xl font-black text-rose-400 mt-1">{breedingAnalytics.active}</p>
+              <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', padding: '16px', borderRadius: '16px' }}>
+                <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold', color: '#fb7185' }}>Active Berried</span>
+                <p style={{ fontSize: '24px', fontWeight: 900, color: '#fb7185', margin: '4px 0 0 0' }}>{breedingAnalytics.active}</p>
               </div>
-              <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-                <span className="text-[10px] uppercase font-bold text-emerald-400">Successfully Hatched</span>
-                <p className="text-2xl font-black text-emerald-400 mt-1">{breedingAnalytics.hatched}</p>
+              <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', padding: '16px', borderRadius: '16px' }}>
+                <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold', color: '#34d399' }}>Successfully Hatched</span>
+                <p style={{ fontSize: '24px', fontWeight: 900, color: '#34d399', margin: '4px 0 0 0' }}>{breedingAnalytics.hatched}</p>
               </div>
-              <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-                <span className="text-[10px] uppercase font-bold text-amber-400">Hatching Success Rate</span>
-                <p className="text-2xl font-black text-amber-400 mt-1">{breedingAnalytics.successRate}%</p>
+              <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', padding: '16px', borderRadius: '16px' }}>
+                <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold', color: '#fbbf24' }}>Success Rate</span>
+                <p style={{ fontSize: '24px', fontWeight: 900, color: '#fbbf24', margin: '4px 0 0 0' }}>{breedingAnalytics.successRate}%</p>
               </div>
             </div>
 
-            {/* Breeding List Cards */}
+            {/* Cards Grid */}
             {breedingList.length === 0 ? (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center">
-                <AlertCircle className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-                <h3 className="text-lg font-bold text-slate-300">No Berried Females Logged</h3>
-                <p className="text-xs text-slate-500 mt-1 mb-4">Start tracking berried crayfish to monitor incubation timelines.</p>
+              <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', padding: '48px', textAlign: 'center' }}>
+                <AlertCircle size={48} color="#64748b" style={{ margin: '0 auto 12px auto' }} />
+                <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#cbd5e1', margin: 0 }}>No Berried Females Logged</h3>
+                <p style={{ fontSize: '12px', color: '#64748b', margin: '8px 0 16px 0' }}>Start tracking berried crayfish to monitor incubation timelines.</p>
                 <button
                   onClick={() => setCurrentScreen('addBreedingForm')}
-                  className="bg-rose-500 text-white font-bold px-4 py-2 rounded-xl text-xs"
+                  style={{ backgroundColor: '#f43f5e', color: '#ffffff', fontWeight: 'bold', padding: '10px 16px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontSize: '12px' }}
                 >
                   Log First Berried Female
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
                 {breedingList.map((item) => {
                   const incubation = getIncubationDetails(item.species, item.berriedDate);
                   return (
-                    <div key={item.id} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between">
+                    <div key={item.id} style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                       <div>
-                        <div className="h-48 w-full bg-slate-950 relative overflow-hidden">
-                          <img src={item.imageUri} alt={item.species} className="w-full h-full object-cover" />
-                          <div className="absolute top-3 left-3 flex gap-2">
-                            <span className={`text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider ${
-                              item.status === 'active' ? 'bg-rose-500/90 text-white' :
-                              item.status === 'hatched' ? 'bg-emerald-500/90 text-slate-950' : 'bg-red-500/90 text-white'
-                            }`}>
-                              {item.status.toUpperCase()}
+                        <div style={{ height: '200px', width: '100%', backgroundColor: '#020617', position: 'relative' }}>
+                          <img src={item.imageUri} alt={item.species} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <div style={{ position: 'absolute', top: '12px', left: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 800, padding: '4px 10px', borderRadius: '9999px', textTransform: 'uppercase', backgroundColor: item.status === 'active' ? '#f43f5e' : item.status === 'hatched' ? '#10b981' : '#ef4444', color: item.status === 'hatched' ? '#020617' : '#ffffff' }}>
+                              {item.status}
                             </span>
                             {incubation.aboutToHatch && item.status === 'active' && (
-                              <span className="bg-amber-500 text-slate-950 text-xs font-black px-2.5 py-1 rounded-full animate-pulse">
+                              <span style={{ backgroundColor: '#f59e0b', color: '#020617', fontSize: '11px', fontWeight: 900, padding: '4px 10px', borderRadius: '9999px' }}>
                                 ⚠️ About to Hatch!
                               </span>
                             )}
                           </div>
                           <button
                             onClick={() => handleDeleteBreed(item.id)}
-                            className="absolute top-3 right-3 bg-slate-950/80 hover:bg-red-500 text-slate-300 hover:text-white p-2 rounded-lg transition"
+                            style={{ position: 'absolute', top: '12px', right: '12px', backgroundColor: 'rgba(2, 6, 23, 0.8)', border: 'none', color: '#cbd5e1', padding: '8px', borderRadius: '8px', cursor: 'pointer' }}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 size={16} />
                           </button>
                         </div>
 
-                        <div className="p-5 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-rose-400 uppercase tracking-widest">
+                        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#fb7185', textTransform: 'uppercase' }}>
                               {item.species}
                             </span>
-                            <span className="text-xs font-mono text-slate-400">
+                            <span style={{ fontSize: '11px', fontFamily: 'monospace', color: '#94a3b8' }}>
                               Berried: {item.berriedDate}
                             </span>
                           </div>
 
-                          <p className="text-slate-300 text-xs leading-relaxed">
+                          <p style={{ color: '#cbd5e1', fontSize: '13px', lineHeight: 1.5, margin: 0 }}>
                             {item.description}
                           </p>
 
                           {item.status === 'active' && (
-                            <div className="bg-slate-950 border border-slate-800 p-3 rounded-xl flex items-center justify-between text-xs">
+                            <div style={{ backgroundColor: '#020617', border: '1px solid #1e293b', padding: '12px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' }}>
                               <div>
-                                <span className="text-slate-400 block">Incubation Progress</span>
-                                <strong className="text-white font-mono">{incubation.diffDays} days berried</strong>
+                                <span style={{ color: '#94a3b8', display: 'block' }}>Incubation Progress</span>
+                                <strong style={{ color: '#ffffff', fontFamily: 'monospace' }}>{incubation.diffDays} days berried</strong>
                               </div>
-                              <div className="text-right">
-                                <span className="text-slate-400 block">Est. Timeframe</span>
-                                <strong className={`font-mono ${incubation.daysRemaining <= 3 ? 'text-amber-400 font-black' : 'text-emerald-400'}`}>
-                                  {incubation.daysRemaining > 0 ? `${incubation.daysRemaining} days left` : 'Hatching due now!'}
+                              <div style={{ textAlign: 'right' }}>
+                                <span style={{ color: '#94a3b8', display: 'block' }}>Timeframe</span>
+                                <strong style={{ fontFamily: 'monospace', color: incubation.daysRemaining <= 3 ? '#fbbf24' : '#34d399' }}>
+                                  {incubation.daysRemaining > 0 ? `${incubation.daysRemaining} days left` : 'Due now!'}
                                 </strong>
                               </div>
                             </div>
                           )}
 
                           {item.status === 'failed' && item.failReason && (
-                            <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl text-xs text-red-300">
+                            <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '10px', borderRadius: '10px', fontSize: '12px', color: '#fca5a5' }}>
                               <strong>Failure Reason:</strong> {item.failReason}
                             </div>
                           )}
                         </div>
                       </div>
 
-                      <div className="p-4 bg-slate-950/50 border-t border-slate-800 flex items-center justify-between gap-2">
+                      <div style={{ padding: '16px', backgroundColor: 'rgba(2, 6, 23, 0.5)', borderTop: '1px solid #1e293b', display: 'flex', gap: '8px' }}>
                         <button
                           onClick={() => handleEditBreedSetup(item)}
-                          className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition"
+                          style={{ flex: 1, backgroundColor: '#1e293b', border: 'none', color: '#e2e8f0', fontWeight: 'bold', padding: '8px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                         >
-                          <Edit3 className="w-3.5 h-3.5" /> Edit Details
+                          <Edit3 size={14} /> Edit
                         </button>
                         <button
                           onClick={() => {
@@ -546,9 +532,9 @@ export default function App() {
                             setModalNewStatus(item.status === 'failed' ? 'hatched' : item.status);
                             setModalFailReason(item.failReason || '');
                           }}
-                          className="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition"
+                          style={{ flex: 1, backgroundColor: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#34d399', fontWeight: 'bold', padding: '8px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                         >
-                          <CheckCircle className="w-3.5 h-3.5" /> Update Status
+                          <CheckCircle size={14} /> Status
                         </button>
                       </div>
                     </div>
@@ -559,40 +545,38 @@ export default function App() {
           </div>
         )}
 
-        {/* 3. ADD / EDIT BREEDING ENTRY FORM */}
+        {/* 3. ADD / EDIT BREEDING FORM */}
         {currentScreen === 'addBreedingForm' && (
-          <div className="max-w-xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
-              <button
-                onClick={() => setCurrentScreen('breedingList')}
-                className="flex items-center gap-2 text-slate-400 hover:text-white transition text-sm font-semibold"
-              >
-                <ChevronLeft className="w-4 h-4" /> Back to Tracker
-              </button>
-            </div>
+          <div style={{ maxWidth: '550px', margin: '0 auto' }}>
+            <button
+              onClick={() => setCurrentScreen('breedingList')}
+              style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600, padding: 0, marginBottom: '16px' }}
+            >
+              <ChevronLeft size={16} /> Back to Tracker
+            </button>
 
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl">
-              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-800">
-                <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center border border-rose-500/20">
-                  <Heart className="w-5 h-5 fill-rose-500/20" />
+            <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', padding: '32px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid #1e293b' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', backgroundColor: 'rgba(244, 63, 94, 0.1)', color: '#fb7185', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(244, 63, 94, 0.2)' }}>
+                  <Heart size={20} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">
-                    {editingBreedId ? 'Edit Berried Female Record' : 'Add Berried Female Crayfish'}
+                  <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#ffffff', margin: 0 }}>
+                    {editingBreedId ? 'Edit Berried Record' : 'Log Berried Female'}
                   </h2>
-                  <p className="text-xs text-slate-400">Log species and berried incubation details</p>
+                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0 0' }}>Specify incubation parameters</p>
                 </div>
               </div>
 
-              <form onSubmit={handleSaveBreeding} className="space-y-5">
+              <form onSubmit={handleSaveBreeding} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#cbd5e1', textTransform: 'uppercase', marginBottom: '8px' }}>
                     Species Selection
                   </label>
                   <select
                     value={breedSpecies}
                     onChange={(e) => setBreedSpecies(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-rose-500 rounded-xl px-4 py-3 text-white focus:outline-none transition text-sm"
+                    style={{ width: '100%', backgroundColor: '#020617', border: '1px solid #334155', borderRadius: '12px', padding: '12px', color: '#ffffff', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
                   >
                     <option value="Clarkii">Clarkii (~3 weeks incubation)</option>
                     <option value="Australian Red Claw">Australian Red Claw (~6-8 weeks incubation)</option>
@@ -600,7 +584,7 @@ export default function App() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#cbd5e1', textTransform: 'uppercase', marginBottom: '8px' }}>
                     Berried Date
                   </label>
                   <input
@@ -608,26 +592,26 @@ export default function App() {
                     required
                     value={breedDate}
                     onChange={(e) => setBreedDate(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-rose-500 rounded-xl px-4 py-3 text-white focus:outline-none transition text-sm"
+                    style={{ width: '100%', backgroundColor: '#020617', border: '1px solid #334155', borderRadius: '12px', padding: '12px', color: '#ffffff', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#cbd5e1', textTransform: 'uppercase', marginBottom: '8px' }}>
                     Description & Tank Notes
                   </label>
                   <textarea
                     rows={3}
                     required
-                    placeholder="Enter egg color, tank number, female size, or water parameters..."
+                    placeholder="Enter egg color, tank number, or water parameters..."
                     value={breedDescription}
                     onChange={(e) => setBreedDescription(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-rose-500 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none transition text-sm resize-none"
+                    style={{ width: '100%', backgroundColor: '#020617', border: '1px solid #334155', borderRadius: '12px', padding: '12px', color: '#ffffff', fontSize: '14px', outline: 'none', resize: 'none', boxSizing: 'border-box' }}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#cbd5e1', textTransform: 'uppercase', marginBottom: '8px' }}>
                     Upload Photo
                   </label>
                   <input
@@ -641,26 +625,26 @@ export default function App() {
                         reader.readAsDataURL(file);
                       }
                     }}
-                    className="w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-500/10 file:text-rose-400 hover:file:bg-rose-500/20 cursor-pointer"
+                    style={{ width: '100%', fontSize: '12px', color: '#94a3b8' }}
                   />
                   {breedImage && (
-                    <div className="mt-3 relative rounded-xl overflow-hidden h-36 border border-slate-800">
-                      <img src={breedImage} alt="Preview" className="w-full h-full object-cover" />
+                    <div style={{ marginTop: '12px', borderRadius: '12px', overflow: 'hidden', height: '140px', border: '1px solid #334155' }}>
+                      <img src={breedImage} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                   )}
                 </div>
 
-                <div className="pt-4 flex items-center gap-3">
+                <div style={{ display: 'flex', gap: '12px', paddingTop: '12px' }}>
                   <button
                     type="submit"
-                    className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-rose-500/20 text-sm flex items-center justify-center gap-2"
+                    style={{ flex: 1, backgroundColor: '#f43f5e', color: '#ffffff', fontWeight: 'bold', padding: '14px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '14px' }}
                   >
-                    <CheckCircle2 className="w-4 h-4" /> Save Berried Record
+                    Save Berried Record
                   </button>
                   <button
                     type="button"
                     onClick={() => setCurrentScreen('breedingList')}
-                    className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-5 py-3.5 rounded-xl transition text-sm"
+                    style={{ backgroundColor: '#1e293b', color: '#cbd5e1', fontWeight: 'bold', padding: '14px 20px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '14px' }}
                   >
                     Cancel
                   </button>
@@ -672,29 +656,28 @@ export default function App() {
 
         {/* 4. SALES ANALYTICS DASHBOARD */}
         {currentScreen === 'salesDashboard' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
               <div>
                 <button
                   onClick={() => setCurrentScreen('navHub')}
-                  className="flex items-center gap-2 text-slate-400 hover:text-white transition text-xs font-semibold mb-1"
+                  style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 600, padding: 0, marginBottom: '4px' }}
                 >
-                  <ChevronLeft className="w-3.5 h-3.5" /> Navigation Hub
+                  <ChevronLeft size={14} /> Navigation Hub
                 </button>
-                <h2 className="text-2xl font-black text-white flex items-center gap-2">
-                  <BarChart3 className="w-6 h-6 text-amber-400" /> Sales Analytics Dashboard
+                <h2 style={{ fontSize: '24px', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <BarChart3 size={24} color="#fbbf24" /> Sales Analytics Dashboard
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">Analyze farm revenue performance over key periods</p>
               </div>
               <button
                 onClick={() => setCurrentScreen('salesForm')}
-                className="bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5"
+                style={{ backgroundColor: '#10b981', color: '#020617', fontWeight: 'bold', padding: '10px 16px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '12px' }}
               >
-                <Plus className="w-4 h-4" /> New Sale
+                + New Sale
               </button>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-1.5 rounded-2xl flex items-center gap-1">
+            <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', padding: '6px', borderRadius: '16px', display: 'flex', gap: '4px' }}>
               {[
                 { id: 'daily', label: 'Daily (Today)' },
                 { id: 'weekly', label: '7 Days' },
@@ -704,40 +687,36 @@ export default function App() {
                 <button
                   key={tab.id}
                   onClick={() => setAnalyticsTimeframe(tab.id)}
-                  className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold transition text-center ${
-                    analyticsTimeframe === tab.id
-                      ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  style={{ flex: 1, padding: '10px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', backgroundColor: analyticsTimeframe === tab.id ? '#fbbf24' : 'transparent', color: analyticsTimeframe === tab.id ? '#020617' : '#94a3b8' }}
                 >
                   {tab.label}
                 </button>
               ))}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Revenue</span>
-                <p className="text-2xl font-black text-emerald-400 mt-2">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+              <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', padding: '20px', borderRadius: '16px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#94a3b8', textTransform: 'uppercase' }}>Revenue</span>
+                <p style={{ fontSize: '26px', fontWeight: 900, color: '#34d399', margin: '6px 0 0 0' }}>
                   ₱{sales.reduce((sum, item) => sum + parseFloat(item.totalPrice || 0), 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </p>
               </div>
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Transactions</span>
-                <p className="text-2xl font-black text-white mt-2">{sales.length}</p>
+              <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', padding: '20px', borderRadius: '16px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#94a3b8', textTransform: 'uppercase' }}>Transactions</span>
+                <p style={{ fontSize: '26px', fontWeight: 900, color: '#ffffff', margin: '6px 0 0 0' }}>{sales.length}</p>
               </div>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-              <h3 className="text-sm font-bold text-white mb-4">Recent Sales Ledger</h3>
-              <div className="space-y-2">
+            <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', padding: '24px' }}>
+              <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 16px 0' }}>Recent Sales Ledger</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {sales.map((item) => (
-                  <div key={item.id} className="bg-slate-950 p-3.5 rounded-xl flex items-center justify-between border border-slate-800">
+                  <div key={item.id} style={{ backgroundColor: '#020617', padding: '14px 18px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #1e293b' }}>
                     <div>
-                      <p className="text-sm font-bold text-white">{item.buyerName}</p>
-                      <p className="text-xs text-slate-400">📅 {item.date}</p>
+                      <p style={{ fontSize: '14px', fontWeight: 'bold', color: '#ffffff', margin: 0 }}>{item.buyerName}</p>
+                      <p style={{ fontSize: '11px', color: '#94a3b8', margin: '2px 0 0 0' }}>📅 {item.date}</p>
                     </div>
-                    <span className="text-base font-black text-emerald-400">₱{parseFloat(item.totalPrice).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                    <span style={{ fontSize: '16px', fontWeight: 900, color: '#34d399' }}>₱{parseFloat(item.totalPrice).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                   </div>
                 ))}
               </div>
@@ -747,34 +726,32 @@ export default function App() {
 
         {/* 5. CRAYFISH CATALOG INVENTORY */}
         {currentScreen === 'crayfishList' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
                 <button
                   onClick={() => setCurrentScreen('navHub')}
-                  className="flex items-center gap-2 text-slate-400 hover:text-white transition text-xs font-semibold mb-1"
+                  style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 600, padding: 0, marginBottom: '4px' }}
                 >
-                  <ChevronLeft className="w-3.5 h-3.5" /> Navigation Hub
+                  <ChevronLeft size={14} /> Navigation Hub
                 </button>
-                <h2 className="text-2xl font-black text-white flex items-center gap-2">
-                  <Package className="w-6 h-6 text-purple-400" /> Crayfish Catalog
-                </h2>
+                <h2 style={{ fontSize: '24px', fontWeight: 900, color: '#ffffff', margin: 0 }}>Crayfish Catalog</h2>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
               {inventory.map((item) => (
-                <div key={item.id} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-                  <div className="h-48 w-full bg-slate-950 relative">
-                    <img src={item.imageUri} alt={item.name} className="w-full h-full object-cover" />
-                    <span className="absolute bottom-3 left-3 bg-slate-950/90 text-emerald-400 text-xs font-bold px-2.5 py-1 rounded-md border border-slate-800">
+                <div key={item.id} style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', overflow: 'hidden' }}>
+                  <div style={{ height: '180px', width: '100%', backgroundColor: '#020617', position: 'relative' }}>
+                    <img src={item.imageUri} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <span style={{ position: 'absolute', bottom: '12px', left: '12px', backgroundColor: 'rgba(2, 6, 23, 0.9)', color: '#34d399', fontSize: '11px', fontWeight: 'bold', padding: '4px 10px', borderRadius: '8px', border: '1px solid #1e293b' }}>
                       Stock: {item.stockCount} units
                     </span>
                   </div>
-                  <div className="p-5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400">{item.species}</span>
-                    <h3 className="text-lg font-extrabold text-white mt-0.5 mb-2">{item.name}</h3>
-                    <p className="text-slate-300 text-xs leading-relaxed">{item.definition}</p>
+                  <div style={{ padding: '20px' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', color: '#c084fc' }}>{item.species}</span>
+                    <h3 style={{ fontSize: '16px', fontWeight: 'extrabold', color: '#ffffff', margin: '4px 0 8px 0' }}>{item.name}</h3>
+                    <p style={{ color: '#cbd5e1', fontSize: '12px', lineHeight: 1.5, margin: 0 }}>{item.definition}</p>
                   </div>
                 </div>
               ))}
@@ -784,15 +761,15 @@ export default function App() {
 
         {/* 6. ENTER SALE FORM */}
         {currentScreen === 'salesForm' && (
-          <div className="max-w-xl mx-auto space-y-6">
+          <div style={{ maxWidth: '500px', margin: '0 auto' }}>
             <button
               onClick={() => setCurrentScreen('navHub')}
-              className="flex items-center gap-2 text-slate-400 hover:text-white transition text-sm font-semibold"
+              style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600, padding: 0, marginBottom: '16px' }}
             >
-              <ChevronLeft className="w-4 h-4" /> Back to Nav Hub
+              <ChevronLeft size={16} /> Back to Nav Hub
             </button>
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl">
-              <h2 className="text-xl font-bold text-white mb-4">Record New Crayfish Sale</h2>
+            <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', padding: '32px' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 20px 0' }}>Record New Crayfish Sale</h2>
               <form onSubmit={(e) => {
                 e.preventDefault();
                 if (!buyerName.trim() || !totalPrice) return;
@@ -802,30 +779,30 @@ export default function App() {
                 setTotalPrice('');
                 showToast('✅ Sale recorded!');
                 setCurrentScreen('salesDashboard');
-              }} className="space-y-4">
+              }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase mb-2">Buyer Name</label>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#cbd5e1', textTransform: 'uppercase', marginBottom: '6px' }}>Buyer Name</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Juan Dela Cruz"
                     value={buyerName}
                     onChange={(e) => setBuyerName(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none"
+                    style={{ width: '100%', backgroundColor: '#020617', border: '1px solid #334155', borderRadius: '12px', padding: '12px', color: '#ffffff', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase mb-2">Sale Date</label>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#cbd5e1', textTransform: 'uppercase', marginBottom: '6px' }}>Sale Date</label>
                   <input
                     type="date"
                     required
                     value={saleDate}
                     onChange={(e) => setSaleDate(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none"
+                    style={{ width: '100%', backgroundColor: '#020617', border: '1px solid #334155', borderRadius: '12px', padding: '12px', color: '#ffffff', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase mb-2">Total Price (₱ PHP)</label>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#cbd5e1', textTransform: 'uppercase', marginBottom: '6px' }}>Total Price (₱ PHP)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -833,10 +810,10 @@ export default function App() {
                     placeholder="0.00"
                     value={totalPrice}
                     onChange={(e) => setTotalPrice(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none"
+                    style={{ width: '100%', backgroundColor: '#020617', border: '1px solid #334155', borderRadius: '12px', padding: '12px', color: '#ffffff', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </div>
-                <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3.5 rounded-xl">
+                <button type="submit" style={{ width: '100%', backgroundColor: '#10b981', color: '#020617', fontWeight: 'bold', padding: '14px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '14px', marginTop: '8px' }}>
                   Save Sale Record
                 </button>
               </form>
@@ -845,20 +822,20 @@ export default function App() {
         )}
       </main>
 
-      {/* Status Update Modal for Berried Female */}
+      {/* Status Update Modal */}
       {statusModalItem && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-white">Update Incubation Status</h3>
-            <p className="text-xs text-slate-400">Mark whether this berried crayfish successfully hatched or failed.</p>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 50, backgroundColor: 'rgba(2, 6, 23, 0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', maxWidth: '400px', width: '100%', padding: '24px', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.7)' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 4px 0' }}>Update Incubation Status</h3>
+            <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0 0 16px 0' }}>Mark whether this berried crayfish hatched or failed.</p>
 
-            <form onSubmit={handleUpdateStatusSubmit} className="space-y-4">
+            <form onSubmit={handleUpdateStatusSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-2">Status Outcome</label>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#cbd5e1', textTransform: 'uppercase', marginBottom: '6px' }}>Status Outcome</label>
                 <select
                   value={modalNewStatus}
                   onChange={(e) => setModalNewStatus(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm"
+                  style={{ width: '100%', backgroundColor: '#020617', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#ffffff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
                 >
                   <option value="active">Active (Still Berried)</option>
                   <option value="hatched">Successfully Hatched 🎉</option>
@@ -868,29 +845,29 @@ export default function App() {
 
               {modalNewStatus === 'failed' && (
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase mb-2">Failure Reason</label>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#cbd5e1', textTransform: 'uppercase', marginBottom: '6px' }}>Failure Reason</label>
                   <textarea
                     rows={3}
                     required
-                    placeholder="Specify reason (e.g. poor water parameters, stress, fungal infection, dropped eggs)..."
+                    placeholder="Specify reason (e.g. water parameters, stress)..."
                     value={modalFailReason}
                     onChange={(e) => setModalFailReason(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm resize-none"
+                    style={{ width: '100%', backgroundColor: '#020617', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#ffffff', fontSize: '13px', outline: 'none', resize: 'none', boxSizing: 'border-box' }}
                   />
                 </div>
               )}
 
-              <div className="flex items-center gap-3 pt-2">
+              <div style={{ display: 'flex', gap: '8px', paddingTop: '8px' }}>
                 <button
                   type="submit"
-                  className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl text-sm"
+                  style={{ flex: 1, backgroundColor: '#10b981', color: '#020617', fontWeight: 'bold', padding: '12px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontSize: '13px' }}
                 >
                   Save Status
                 </button>
                 <button
                   type="button"
                   onClick={() => setStatusModalItem(null)}
-                  className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-3 rounded-xl text-sm font-semibold"
+                  style={{ backgroundColor: '#1e293b', color: '#cbd5e1', fontWeight: 'bold', padding: '12px 16px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontSize: '13px' }}
                 >
                   Cancel
                 </button>
@@ -900,8 +877,8 @@ export default function App() {
         </div>
       )}
 
-      <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
-        <p>© Rom's Crayfish Hub Management System • All records persisted locally</p>
+      <footer style={{ borderTop: '1px solid #0f172a', backgroundColor: '#020617', padding: '24px', textAlign: 'center', fontSize: '12px', color: '#64748b' }}>
+        <p style={{ margin: 0 }}>© Rom's Crayfish Hub Management System • All records persisted locally</p>
       </footer>
     </div>
   );
