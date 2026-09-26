@@ -30,7 +30,7 @@ import {
 
 const SALES_STORAGE_KEY = 'roms_crayfish_sales_v3';
 const INVENTORY_STORAGE_KEY = 'roms_crayfish_inventory_v5';
-const BERRIED_STORAGE_KEY = 'roms_crayfish_berried_v2';
+const BERRIED_STORAGE_KEY = 'roms_crayfish_berried_v3';
 
 const INITIAL_SALES = [
   { id: '1', buyerName: 'Juan Dela Cruz', date: new Date().toISOString().split('T')[0], totalPrice: '1200.00' },
@@ -62,7 +62,7 @@ const INITIAL_INVENTORY = [
 const INITIAL_BERRIED = [
   {
     id: 'b1',
-    species: 'Procambarus alleni',
+    species: 'Clarkii (Procambarus clarkii)',
     description: 'Female carrying dark eggs under tail, active and eating well.',
     berriedDate: new Date(Date.now() - 86400000 * 12).toISOString().split('T')[0],
     imageUri: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
@@ -96,9 +96,9 @@ export default function App() {
   const [subConfigSet, setSubConfigSet] = useState('Pair');
   const [subPrice, setSubPrice] = useState('');
 
-  // Berried Female State
+  // Berried Female State (Specific Hardcoded Dropdown)
   const [berriedList, setBerriedList] = useState([]);
-  const [berriedSpecies, setBerriedSpecies] = useState('');
+  const [berriedSpecies, setBerriedSpecies] = useState('Clarkii (Procambarus clarkii)');
   const [berriedDesc, setBerriedDesc] = useState('');
   const [berriedDate, setBerriedDate] = useState(new Date().toISOString().split('T')[0]);
   const [berriedImage, setBerriedImage] = useState('');
@@ -119,15 +119,10 @@ export default function App() {
       setSales(savedSales ? JSON.parse(savedSales) : INITIAL_SALES);
 
       const savedInventory = localStorage.getItem(INVENTORY_STORAGE_KEY);
-      const inv = savedInventory ? JSON.parse(savedInventory) : INITIAL_INVENTORY;
-      setInventory(inv);
+      setInventory(savedInventory ? JSON.parse(savedInventory) : INITIAL_INVENTORY);
 
       const savedBerried = localStorage.getItem(BERRIED_STORAGE_KEY);
       setBerriedList(savedBerried ? JSON.parse(savedBerried) : INITIAL_BERRIED);
-
-      if (inv.length > 0 && !berriedSpecies) {
-        setBerriedSpecies(inv[0].species);
-      }
     } catch (e) {
       console.error('Error reading localStorage:', e);
     }
@@ -287,7 +282,12 @@ export default function App() {
     const start = new Date(item.berriedDate);
     const now = new Date();
     const daysBerried = Math.max(0, Math.floor((now - start) / (1000 * 60 * 60 * 24)));
-    const targetDays = item.species.toLowerCase().includes('clarkii') ? 21 : 49;
+    
+    // Procambarus species (Clarkii, Alleni/Electric Blue) take ~3 weeks. Cherax takes ~7 weeks.
+    const lowerSpecies = item.species.toLowerCase();
+    const isProcambarus = lowerSpecies.includes('clarkii') || lowerSpecies.includes('electric blue') || lowerSpecies.includes('alleni');
+    const targetDays = isProcambarus ? 21 : 49;
+    
     const daysLeft = targetDays - daysBerried;
     const isReadyToHatch = daysLeft <= 3;
     return { daysBerried, targetDays, daysLeft, isReadyToHatch };
@@ -299,7 +299,7 @@ export default function App() {
       showToast('❌ Please provide a description');
       return;
     }
-    const chosenSpecies = berriedSpecies || (inventory[0] ? inventory[0].species : 'Freshwater Species');
+    const chosenSpecies = berriedSpecies || 'Clarkii (Procambarus clarkii)';
 
     if (editingBerriedId) {
       saveBerried(berriedList.map(item => item.id === editingBerriedId ? {
@@ -465,7 +465,7 @@ export default function App() {
                   )}
                 </div>
 
-                {/* Add Sub-Inventory Form (Empty fields by default) */}
+                {/* Add Sub-Inventory Form */}
                 <form onSubmit={handleAddSubInventory} className="border-t border-slate-800 pt-4 space-y-3">
                   <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Add Sub-Inventory Set</h4>
                   
@@ -632,7 +632,7 @@ export default function App() {
                   <div className="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center border border-rose-500/20 group-hover:scale-110 transition shrink-0"><Heart className="w-6 h-6 fill-rose-400" /></div>
                   <div>
                     <h4 className="text-lg font-bold text-white group-hover:text-rose-400 transition">Berried Female & Hatching Tracker</h4>
-                    <p className="text-slate-400 text-sm mt-1">Monitor gestation days, incubation alerts (Clarkii 3 wks, Red Claw 7 wks), and hatch success rates.</p>
+                    <p className="text-slate-400 text-sm mt-1">Monitor gestation days, incubation alerts (Clarkii/Alleni ~3 wks, Cherax ~7 wks), and hatch success rates.</p>
                   </div>
                 </div>
 
@@ -690,7 +690,7 @@ export default function App() {
                         <div className="h-48 w-full bg-slate-950 relative overflow-hidden">
                           <img src={item.imageUri} alt={item.species} className="w-full h-full object-cover" />
                           <div className="absolute top-3 left-3">
-                            <span className="text-xs font-extrabold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">{item.species}</span>
+                            <span className="text-[10px] font-extrabold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 truncate max-w-[200px] block">{item.species}</span>
                           </div>
                           <div className="absolute top-3 right-3 flex gap-1.5">
                             <button onClick={() => handleEditBerried(item)} className="bg-slate-900/80 p-2 rounded-lg text-slate-200"><Edit3 className="w-4 h-4" /></button>
@@ -726,7 +726,7 @@ export default function App() {
           </div>
         )}
 
-        {/* 3. ADD / EDIT BERRIED FORM */}
+        {/* 3. ADD / EDIT BERRIED FORM (Fixed Explicit List) */}
         {currentScreen === 'addBerriedForm' && (
           <div className="max-w-xl mx-auto space-y-6">
             <button onClick={() => setCurrentScreen('berriedList')} className="flex items-center gap-2 text-slate-400 hover:text-white transition text-sm font-semibold"><ChevronLeft className="w-4 h-4" /> Back</button>
@@ -734,17 +734,12 @@ export default function App() {
               <h2 className="text-xl font-bold text-white mb-4">{editingBerriedId ? 'Edit Berried Record' : 'Log Berried Female'}</h2>
               <form onSubmit={handleSaveBerried} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Species (From Catalog)</label>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Species</label>
                   <select value={berriedSpecies} onChange={(e) => setBerriedSpecies(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none">
-                    {inventory.length === 0 ? (
-                      <option value="Freshwater Species">Freshwater Species (No catalog items found)</option>
-                    ) : (
-                      inventory.map(inv => (
-                        <option key={inv.id} value={inv.species}>
-                          {inv.name} ({inv.species})
-                        </option>
-                      ))
-                    )}
+                    <option value="Clarkii (Procambarus clarkii)">Clarkii (Procambarus clarkii)</option>
+                    <option value="Australian Red Claw (Cherax quadricarinatus)">Australian Red Claw (Cherax quadricarinatus)</option>
+                    <option value="Electric Blue (Procambarus alleni)">Electric Blue (Procambarus alleni)</option>
+                    <option value="Destructor (Cherax destructor)">Destructor (Cherax destructor)</option>
                   </select>
                 </div>
                 <div>
