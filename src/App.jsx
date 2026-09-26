@@ -7,18 +7,14 @@ import {
   ShoppingBag,
   Package,
   TrendingUp,
-  Image as ImageIcon,
   Trash2,
   X,
   Layers,
-  Filter,
   BarChart3,
   CheckCircle2,
   AlertCircle,
   Heart,
-  Clock,
   CheckCircle,
-  XCircle,
   Edit3
 } from 'lucide-react';
 
