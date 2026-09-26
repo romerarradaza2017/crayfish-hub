@@ -81,7 +81,7 @@ export default function App() {
   const [totalPrice, setTotalPrice] = useState('');
   const [analyticsTimeframe, setAnalyticsTimeframe] = useState('monthly');
 
-  // Inventory State (Stock count removed)
+  // Inventory State
   const [inventory, setInventory] = useState([]);
   const [editingCrayfishId, setEditingCrayfishId] = useState(null);
   const [crayfishName, setCrayfishName] = useState('');
@@ -90,13 +90,13 @@ export default function App() {
   const [crayfishImage, setCrayfishImage] = useState('');
   const [selectedInventoryItem, setSelectedInventoryItem] = useState(null);
 
-  // Sub-inventory form state (empty fields by default)
+  // Sub-inventory form state
   const [subCategory, setSubCategory] = useState('Breeder');
   const [subSizeRange, setSubSizeRange] = useState('');
   const [subConfigSet, setSubConfigSet] = useState('Pair');
   const [subPrice, setSubPrice] = useState('');
 
-  // Berried Female State (Species dropdown populated from inventory)
+  // Berried Female State
   const [berriedList, setBerriedList] = useState([]);
   const [berriedSpecies, setBerriedSpecies] = useState('');
   const [berriedDesc, setBerriedDesc] = useState('');
@@ -188,7 +188,6 @@ export default function App() {
     reader.readAsText(file);
   };
 
-  // Crayfish Catalog & Sub-inventory Handlers
   const handleSaveCrayfish = (e) => {
     if (e) e.preventDefault();
     if (!crayfishName.trim() || !crayfishDefinition.trim()) {
@@ -284,7 +283,6 @@ export default function App() {
     showToast('🗑️ Sub-inventory removed');
   };
 
-  // Berried handlers (Incubation calculation: Clarkii ~3 weeks / 21 days; others / Red Claw ~7 weeks / 49 days)
   const getIncubationDetails = (item) => {
     const start = new Date(item.berriedDate);
     const now = new Date();
@@ -388,8 +386,7 @@ export default function App() {
     const totalRevenue = filtered.reduce((sum, item) => sum + (parseFloat(item.totalPrice) || 0), 0);
     const totalTransactions = filtered.length;
     const avgTransaction = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
-    const maxSale = filtered.reduce((max, item) => Math.max(max, parseFloat(item.totalPrice) || 0), 0);
-    return { filteredSales: filtered, totalRevenue, totalTransactions, avgTransaction, maxSale };
+    return { filteredSales: filtered, totalRevenue, totalTransactions, avgTransaction };
   }, [sales, analyticsTimeframe]);
 
   const berriedStats = useMemo(() => {
@@ -729,7 +726,7 @@ export default function App() {
           </div>
         )}
 
-        {/* 3. ADD / EDIT BERRIED FORM (Species selection from inventory dropdown) */}
+        {/* 3. ADD / EDIT BERRIED FORM */}
         {currentScreen === 'addBerriedForm' && (
           <div className="max-w-xl mx-auto space-y-6">
             <button onClick={() => setCurrentScreen('berriedList')} className="flex items-center gap-2 text-slate-400 hover:text-white transition text-sm font-semibold"><ChevronLeft className="w-4 h-4" /> Back</button>
@@ -865,7 +862,7 @@ export default function App() {
           </div>
         )}
 
-        {/* 8. CRAYFISH CATALOG INVENTORY (No stock count) */}
+        {/* 8. CRAYFISH CATALOG INVENTORY (With sub-inventory badge previews) */}
         {currentScreen === 'crayfishList' && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -905,6 +902,7 @@ export default function App() {
                         <h3 onClick={() => setSelectedInventoryItem(item)} className="text-lg font-bold text-white mt-0.5 cursor-pointer hover:text-purple-400 transition">{item.name}</h3>
                         <p className="text-slate-300 text-xs mt-1 line-clamp-2">{item.definition}</p>
 
+                        {/* Sub-inventory summary preview badges */}
                         <div className="mt-3 pt-3 border-t border-slate-800 flex flex-wrap gap-1.5">
                           {(!item.subInventories || item.subInventories.length === 0) ? (
                             <span className="text-[10px] text-slate-500 italic">No sub-categories added. Tap to manage pricing sets.</span>
@@ -925,7 +923,7 @@ export default function App() {
           </div>
         )}
 
-        {/* 9. ADD / EDIT CRAYFISH FORM (Stock count removed, empty default) */}
+        {/* 9. ADD / EDIT CRAYFISH FORM */}
         {currentScreen === 'addCrayfishForm' && (
           <div className="max-w-xl mx-auto space-y-6">
             <button onClick={() => setCurrentScreen('crayfishList')} className="flex items-center gap-2 text-slate-400 hover:text-white transition text-sm font-semibold"><ChevronLeft className="w-4 h-4" /> Back to Catalog</button>
